@@ -1,2 +1,4 @@
 dash
 dash_bootstrap_components==1.0.0
+pandas
+plotly
