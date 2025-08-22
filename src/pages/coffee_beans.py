@@ -1,7 +1,7 @@
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from src.app.utils.data_helpers import (
+from src.utils.data_helpers import (
     load_beans_dataframe,
     load_roasters_dataframe,
     make_roaster_distribution,
