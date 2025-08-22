@@ -2,8 +2,8 @@ import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from src.app.utils.data_helpers import (
-    load_bags_dataframe,
-    load_roaster_locations_dataframe,
+    load_beans_dataframe,
+    load_roasters_dataframe,
     make_roaster_distribution,
     make_roast_level_pie,
     make_cumulative_weight_line,
@@ -12,13 +12,13 @@ from src.app.utils.data_helpers import (
 
 dash.register_page(__name__, path='/coffee_beans', name='Coffee Beans')
 
-df = load_bags_dataframe()
-df_roaster_locations = load_roaster_locations_dataframe()
+beans_df = load_beans_dataframe()
+roasters_df = load_roasters_dataframe()
 
-fig_roasters = make_roaster_distribution(df)
-fig_roast_levels = make_roast_level_pie(df)
-fig_cumulative_weight = make_cumulative_weight_line(df)
-fig_roaster_map = make_roaster_location_map(df, df_roaster_locations)
+fig_cumulative_weight = make_cumulative_weight_line(beans_df, roasters_df)
+fig_roast_levels = make_roast_level_pie(beans_df)
+fig_roaster_map = make_roaster_location_map(beans_df, roasters_df)
+fig_roasters = make_roaster_distribution(beans_df, roasters_df)
 
 layout = dbc.Container([
     dbc.Row([
