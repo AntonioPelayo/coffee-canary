@@ -1,0 +1,26 @@
+# VCS and local env
+.git/
+.DS_Store
+.env
+.venv
+
+# Python caches and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+build/
+dist/
+
+# Local tooling and IDE
+.vscode/
+.idea/
+dev/
+venv/
+
+# Project data and misc
+*.log
+*.db
+*.sqlite
