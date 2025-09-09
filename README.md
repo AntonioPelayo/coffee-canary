@@ -1,5 +1,11 @@
 # coffee-canary
-Morning alerts and data visualizations to optimize your daily brew
+Dashboard for monitoring coffee consumption metrics.
+
+## Run (Local dev, no Docker)
+
+1. Copy `.env.example` to `.env` and fill values.
+2. Start the app:
+   - Dev (auto reload): `source build.sh`
 
 ## Run (Docker)
 
@@ -9,7 +15,7 @@ Morning alerts and data visualizations to optimize your daily brew
 	- Direct: `docker run --env-file .env -p 8050:8050 coffee-canary`
 	- Compose: `docker compose up --build`
 
-App: http://0.0.0.0:8050
+Local app: http://0.0.0.0:8050
 
 Data sources
 - Postgres

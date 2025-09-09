@@ -22,7 +22,7 @@ fig_roasters = make_roaster_distribution(beans_df, roasters_df)
 
 layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H2('Coffee Beans Dashboard'), width=12)
+        dbc.Col(html.H2("Antonio's Coffee Blend Dashboard"), width=12)
     ]),
     dbc.Row([
         dbc.Col(dcc.Graph(figure=fig_cumulative_weight))

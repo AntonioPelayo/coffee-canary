@@ -1,3 +1,4 @@
+import os
 import dash
 import dash_bootstrap_components as dbc
 from dash import html, dcc
@@ -15,6 +16,7 @@ navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/")),
         dbc.NavItem(dbc.NavLink("Coffee Beans", href="/coffee_beans")),
+        dbc.NavItem(dbc.NavLink("Daily Consumption", href="/daily_consumption")),
     ],
     brand="Coffee Canary",
     brand_href="/",
