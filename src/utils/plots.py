@@ -26,13 +26,13 @@ def make_roaster_distribution(df_bags: pd.DataFrame, df_roasters: pd.DataFrame):
 
     if 'roaster_id' in df_bags.columns and not df_roasters.empty and {'id', 'name'}.issubset(df_roasters.columns):
         merged = df_bags.merge(
-            df_roasters[['id', 'name']],
+            df_roasters,
             left_on='roaster_id', right_on='id', how='left', suffixes=("_bean", "_roaster")
         )
         merged['Roaster'] = merged['name_roaster']
         counts = merged['Roaster'].dropna().value_counts().reset_index()
         counts.columns = ['Roaster', 'Count']
-        counts['Location'] = counts['city'] + ', ' + counts['state']
+        counts['Location'] = merged['city'] + ', ' + merged['state']
         counts = counts.sort_values(['Count', 'Roaster'], ascending=[False, True])
 
         return px.bar(
@@ -113,14 +113,16 @@ def make_roaster_location_map(beans_df: pd.DataFrame, roasters_df: pd.DataFrame)
     if roasters_df is None or roasters_df.empty:
         return go.Figure()
     used = set()
-    for col in ['Roaster', 'roaster', 'roaster_name', 'name']:
+    for col in ['Roaster', 'roaster', 'roaster_id', 'roaster_name']:
         if col in beans_df.columns:
             used = set(beans_df[col].dropna().astype(str).str.strip().unique())
             break
     df_r = roasters_df.copy()
-    if used:
-        if 'name' in df_r.columns:
-            df_r = df_r[df_r['name'].isin(used)]
+
+    # if used:
+    #     if 'name' in df_r.columns:
+    #         df_r = df_r[df_r['id'].isin(used)]
+
     if df_r.empty:
         return go.Figure()
     if not {'name', 'city', 'state'}.issubset(df_r.columns):
@@ -129,8 +131,11 @@ def make_roaster_location_map(beans_df: pd.DataFrame, roasters_df: pd.DataFrame)
     df_r['lat'] = df_r.apply(lambda r: CITY_STATE_LATLON.get((r['city'], r['state']), (None, None))[0], axis=1)
     df_r['lon'] = df_r.apply(lambda r: CITY_STATE_LATLON.get((r['city'], r['state']), (None, None))[1], axis=1)
     df_r = df_r.dropna(subset=['lat', 'lon'])
+    df_r = df_r[df_r['id'].notna()]
+
     if df_r.empty:
         return go.Figure()
+
     fig = go.Figure(go.Scattergeo(
         locationmode='USA-states',
         lon=df_r['lon'],
