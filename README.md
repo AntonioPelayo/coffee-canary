@@ -5,7 +5,9 @@ Dashboard for monitoring coffee consumption metrics.
 
 1. Copy `.env.example` to `.env` and fill values.
 2. Start the app:
-   - Dev (auto reload): `source build.sh`
+   - Dev (auto reload): `build.sh -d`
+   - Prod test (Gunicorn): `build.sh`
+3. Access the app at `http://127.0.0.1:8050`
 
 ## Run (Docker)
 
