@@ -1,8 +1,9 @@
 import os
 from typing import Optional
+
 import pandas as pd
 
-from .db import _get_engine
+from .db import get_table_dataframe
 
 
 def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -23,52 +24,25 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def load_beans_dataframe() -> pd.DataFrame:
-    """Load coffee bean records from Postgres if available, otherwise CSV.
+def _table_setting(env_var: str, default_key: str) -> str:
+    """Read a table identifier from the environment with a safe default."""
+    value = os.getenv(env_var)
+    if value:
+        return value
+    return default_key
 
-    Table name can be set via COFFEE_BEANS_TABLE (defaults to coffee_beans).
-    CSV fallback path via COFFEE_BEANS_CSV.
-    """
-    engine = _get_engine()
-    if engine is not None:
-        table = os.getenv('COFFEE_BEANS_TABLE')
-        if table:
-            query = f'SELECT * FROM {table}'
-            try:
-                df = pd.read_sql(query, con=engine)
-                return df
-            except Exception as e:
-                print(e)
-    # CSV fallback
-    csv_path = os.getenv('COFFEE_BEANS_CSV', 'data/coffee_beans.csv')
-    try:
-        if csv_path and os.path.exists(csv_path):
-            return pd.read_csv(csv_path)
-    except Exception as e:
-        print(e)
-    return pd.DataFrame()
+
+def load_beans_dataframe() -> pd.DataFrame:
+    """Load coffee bean records from the warehouse table."""
+    table_key = _table_setting("COFFEE_BEANS_TABLE", "warehouse.fact_coffee_beans")
+    df = get_table_dataframe(table_key)
+    return _normalize_columns(df)
 
 
 def load_roasters_dataframe() -> pd.DataFrame:
-    """Load roaster location records from Postgres if available, otherwise CSV."""
-    engine = _get_engine()
-    if engine is not None:
-        table = os.getenv('COFFEE_ROASTERS_TABLE')
-        if table:
-            query = f'SELECT * FROM {table}'
-            try:
-                df = pd.read_sql(query, con=engine)
-                return df
-            except Exception as e:
-                print(e)
-    # CSV fallback
-    csv_path = os.getenv('COFFEE_ROASTERS_CSV', 'data/coffee_roasters.csv')
-    try:
-        if csv_path and os.path.exists(csv_path):
-            return pd.read_csv(csv_path)
-    except Exception as e:
-        print(e)
-    return pd.DataFrame()
+    """Load roaster dimension records from the warehouse table."""
+    table_key = _table_setting("COFFEE_ROASTERS_TABLE", "warehouse.dim_roaster")
+    return get_table_dataframe(table_key)
 
 
 def detect_roast_column(df: pd.DataFrame) -> Optional[str]:
