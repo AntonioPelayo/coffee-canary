@@ -3,147 +3,132 @@ import plotly.graph_objects as go
 import pandas as pd
 
 from .data_helpers import detect_roast_column
+from ..db.schema import (
+    BEANS_COL_PURCHASE_DATE,
+    BEANS_COL_ROASTER,
+    BEANS_COL_BLEND_NAME,
+    BEANS_COL_ROAST_LEVEL,
+    BEANS_COL_WEIGHT_GRAMS,
+    ROASTERS_COL_ID,
+    ROASTERS_COL_NAME,
+    ROASTERS_COL_CITY,
+    ROASTERS_COL_STATE
+)
 from ..config import CITY_STATE_LATLON
 
-def make_roaster_distribution(df_bags: pd.DataFrame, df_roasters: pd.DataFrame):
-    if df_bags is None or df_bags.empty:
+def make_roaster_distribution(beans_df: pd.DataFrame, roasters_df: pd.DataFrame):
+    if beans_df is None or beans_df.empty:
         return px.bar(title='No coffee bean data available')
 
-    if df_roasters is None or df_roasters.empty:
+    if roasters_df is None or roasters_df.empty:
         return px.bar(title='No roaster data available')
 
+    roaster_series = beans_df[BEANS_COL_ROASTER].dropna().astype(str).str.strip()
+    if roaster_series.empty:
+        return px.bar(title='No data available')
 
-    if 'Roaster' in df_bags.columns:
-        series = df_bags['Roaster'].dropna().astype(str).str.strip()
-        if series.empty:
-            return px.bar(title='No data available')
+    counts = roaster_series.value_counts().reset_index()
+    counts.columns = ['Roaster', 'Count']
+    counts = counts.sort_values(['Count', 'Roaster'], ascending=[False, True])
 
-        counts = series.value_counts().reset_index()
-        counts.columns = ['Roaster', 'Count']
-        counts = counts.sort_values(['Count', 'Roaster'], ascending=[False, True])
+    merged = counts.merge(
+        roasters_df,
+        left_on='Roaster',
+        right_on=ROASTERS_COL_NAME,
+        how='left'
+    )
 
-        return px.bar(counts, x='Roaster', y='Count', title='Distribution of Coffee Beans by Roaster')
+    merged['Location'] = merged[ROASTERS_COL_CITY] + ', ' + merged[ROASTERS_COL_STATE]
 
-    if 'roaster_id' in df_bags.columns and not df_roasters.empty and {'id', 'name'}.issubset(df_roasters.columns):
-        merged = df_bags.merge(
-            df_roasters,
-            left_on='roaster_id', right_on='id', how='left', suffixes=("_bean", "_roaster")
-        )
-        merged['Roaster'] = merged['name_roaster']
-        counts = merged['Roaster'].dropna().value_counts().reset_index()
-        counts.columns = ['Roaster', 'Count']
-        counts['Location'] = merged['city'] + ', ' + merged['state']
-        counts = counts.sort_values(['Count', 'Roaster'], ascending=[False, True])
-
-        return px.bar(
-            counts,
-            x='Roaster',
-            y='Count',
-            hover_data={'Location': True},
-            title='Distribution of Coffee Beans by Roaster'
-        )
-
-    return px.bar(title='No data available')
+    return px.bar(
+        merged,
+        x='Roaster',
+        y='Count',
+        hover_data={'Location': True},
+        title='Distribution of Coffee Beans by Roaster'
+    )
 
 
-def make_roast_level_pie(df: pd.DataFrame):
+def make_roast_level_pie(beans_df: pd.DataFrame):
     """Pie chart of roast level proportions."""
-    col = detect_roast_column(df)
-    if not col:
+    roast_level_series = beans_df[BEANS_COL_ROAST_LEVEL].dropna().astype(str).str.strip()
+
+    if roast_level_series.empty:
         return px.bar(title='No data available')
-    series = df[col].dropna().astype(str).str.strip()
-    series = series[series != '']
-    if series.empty:
-        return px.bar(title='No data available')
-    counts = series.value_counts().reset_index()
+
+    counts = roast_level_series.value_counts().reset_index()
     counts.columns = ['Roast Level', 'Count']
-    fig = px.pie(counts, names='Roast Level', values='Count', title='Roast Level Proportions', hole=0.4)
+    fig = px.pie(
+        counts,
+        names='Roast Level',
+        values='Count',
+        title='Roast Level Proportions',
+        hole=0.4
+    )
     fig.update_traces(textposition='inside', textinfo='percent+label')
     return fig
 
 
 def make_cumulative_weight_line(beans_df: pd.DataFrame, roasters_df: pd.DataFrame):
-    date_col = None
-    for candidate in ['Date', 'date', 'Purchase Date', 'Bought Date', 'purchase_date']:
-        if candidate in beans_df.columns:
-            date_col = candidate
-            break
-    weight_col = None
-    for candidate in ['Weight (g)', 'Net Weight (g)', 'Net Weight', 'Weight', 'weight_g']:
-        if candidate in beans_df.columns:
-            weight_col = candidate
-            break
-    if not (date_col and weight_col):
-        return px.line(title='No data available')
-    hover_cols = [date_col, weight_col]
-    for extra in ['name', 'Blend Name', 'roaster_id', 'Roaster']:
-        if extra in beans_df.columns and extra not in hover_cols:
-            hover_cols.append(extra)
-    df_dates = beans_df[hover_cols].copy().dropna(subset=[date_col, weight_col])
-    df_dates[date_col] = pd.to_datetime(df_dates[date_col], errors='coerce')
-    df_dates = df_dates.dropna(subset=[date_col]).sort_values(date_col)
-    df_dates['Cumulative Weight (g)'] = df_dates[weight_col].astype(float).cumsum()
-    merged = df_dates.copy()
-    if 'roaster_id' in df_dates.columns and not roasters_df.empty and {'id', 'name'}.issubset(roasters_df.columns):
-        merged = df_dates.merge(roasters_df[['id', 'name']], left_on='roaster_id', right_on='id', how='left', suffixes=("_bean", "_roaster"))
-        merged['Roaster'] = merged.get('name_roaster', merged.get('Roaster'))
-    # hover labels
-    merged['Blend Name'] = merged.get('Blend Name', merged.get('name'))
-    if 'Bag Weight (g)' not in merged.columns:
-        merged['Bag Weight (g)'] = merged[weight_col]
+    col_labels = {
+        BEANS_COL_PURCHASE_DATE: 'Purchase Date',
+        BEANS_COL_ROASTER: 'Roaster',
+        BEANS_COL_BLEND_NAME: 'Blend Name',
+        BEANS_COL_WEIGHT_GRAMS: 'Bag Weight (g)',
+        'cumulative_weight_g': 'Cumulative Weight (g)',
+    }
+    df = beans_df.copy()
+    df['purchase_date'] = pd.to_datetime(df['purchase_date'], errors='coerce')
+    df = df.dropna(subset=['purchase_date']).sort_values('purchase_date')
+    df['cumulative_weight_g'] = df['weight_grams'].astype(float).cumsum()
+
+    roasters_for_merge = roasters_df[[ROASTERS_COL_ID, ROASTERS_COL_NAME]].rename(
+        columns={
+            ROASTERS_COL_ID: 'roaster_id',
+            ROASTERS_COL_NAME: BEANS_COL_ROASTER
+        }
+    )
+    merged_df = df.merge(roasters_for_merge, on=BEANS_COL_ROASTER, how='left')
+
     fig = px.line(
-        merged,
-        x=date_col,
-        y='Cumulative Weight (g)',
+        merged_df,
+        x=BEANS_COL_PURCHASE_DATE,
+        y='cumulative_weight_g',
+        labels=col_labels,
         title='Cumulative Weight of Beans Consumed Over Time',
         markers=True,
         hover_data={
-            'Blend Name': 'Blend Name' in merged.columns,
-            'Roaster': 'Roaster' in merged.columns,
-            date_col: False,
-            'Bag Weight (g)': 'Bag Weight (g)' in merged.columns,
-            'Cumulative Weight (g)': True
+            BEANS_COL_ROASTER: True,
+            BEANS_COL_BLEND_NAME: True,
+            BEANS_COL_WEIGHT_GRAMS: True
         }
     )
     fig.update_layout(xaxis_title='Date', yaxis_title='Cumulative Weight (g)')
     return fig
 
 
-def make_roaster_location_map(beans_df: pd.DataFrame, roasters_df: pd.DataFrame):
+def make_roaster_location_map(roasters_df: pd.DataFrame):
     if roasters_df is None or roasters_df.empty:
-        return go.Figure()
-    used = set()
-    for col in ['Roaster', 'roaster', 'roaster_id', 'roaster_name']:
-        if col in beans_df.columns:
-            used = set(beans_df[col].dropna().astype(str).str.strip().unique())
-            break
-    df_r = roasters_df.copy()
+        return go.Figure(title='No roaster data available')
 
-    # if used:
-    #     if 'name' in df_r.columns:
-    #         df_r = df_r[df_r['id'].isin(used)]
-
-    if df_r.empty:
-        return go.Figure()
-    if not {'name', 'city', 'state'}.issubset(df_r.columns):
-        return go.Figure()
-    df_r['Location'] = df_r['city'] + ', ' + df_r['state']
-    df_r['lat'] = df_r.apply(lambda r: CITY_STATE_LATLON.get((r['city'], r['state']), (None, None))[0], axis=1)
-    df_r['lon'] = df_r.apply(lambda r: CITY_STATE_LATLON.get((r['city'], r['state']), (None, None))[1], axis=1)
-    df_r = df_r.dropna(subset=['lat', 'lon'])
-    df_r = df_r[df_r['id'].notna()]
-
-    if df_r.empty:
-        return go.Figure()
+    df = roasters_df.copy()
+    df['Location'] = df[ROASTERS_COL_CITY] + ', ' + df[ROASTERS_COL_STATE]
+    df['lat'] = df.apply(lambda r: CITY_STATE_LATLON.get(
+        (r[ROASTERS_COL_CITY], r[ROASTERS_COL_STATE]), (None, None)
+    )[0], axis=1)
+    df['lon'] = df.apply(lambda r: CITY_STATE_LATLON.get(
+        (r[ROASTERS_COL_CITY], r[ROASTERS_COL_STATE]), (None, None)
+    )[1], axis=1)
+    df = df.dropna(subset=['lat', 'lon'])
 
     fig = go.Figure(go.Scattergeo(
         locationmode='USA-states',
-        lon=df_r['lon'],
-        lat=df_r['lat'],
-        text=df_r['name'] + ' (' + df_r['Location'] + ')',
+        lon=df['lon'],
+        lat=df['lat'],
+        text=df[ROASTERS_COL_NAME] + ' (' + df['Location'] + ')',
         mode='markers',
         marker=dict(size=10, color='crimson', line=dict(width=1, color='black')),
-        hovertext=df_r['name'] + '<br>' + df_r['Location'],
+        hovertext=df[ROASTERS_COL_NAME] + '<br>' + df['Location'],
         hoverinfo='text',
     ))
     fig.update_layout(
@@ -161,4 +146,3 @@ def make_roaster_location_map(beans_df: pd.DataFrame, roasters_df: pd.DataFrame)
         margin=dict(l=0, r=0, t=40, b=0)
     )
     return fig
-
