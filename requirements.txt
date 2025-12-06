@@ -3,5 +3,4 @@ dash_bootstrap_components==1.0.0
 gunicorn
 pandas
 plotly
-psycopg2-binary
 sqlalchemy

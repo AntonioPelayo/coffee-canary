@@ -1,6 +1,7 @@
 __pycache__/
-dev/
+admin/
 venv/
 
+*.db
 .DS_Store
 .env
