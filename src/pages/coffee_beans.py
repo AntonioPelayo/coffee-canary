@@ -24,7 +24,7 @@ layout = dbc.Container([
         width=12
     )]),
     dbc.Row([dbc.Col(
-        dcc.Graph(figure=make_cumulative_weight_line(beans_df, roasters_df)),
+        dcc.Graph(figure=make_cumulative_weight_line(beans_df)),
         width=12
     )], className='mt-4'),
     dbc.Row([

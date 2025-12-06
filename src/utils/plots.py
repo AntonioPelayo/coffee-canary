@@ -69,7 +69,10 @@ def make_roast_level_pie(beans_df: pd.DataFrame):
     return fig
 
 
-def make_cumulative_weight_line(beans_df: pd.DataFrame, roasters_df: pd.DataFrame):
+def make_cumulative_weight_line(beans_df: pd.DataFrame):
+    if beans_df is None or beans_df.empty:
+        return px.line(title='No coffee bean data available')
+
     col_labels = {
         BEANS_COL_PURCHASE_DATE: 'Purchase Date',
         BEANS_COL_ROASTER: 'Roaster',
@@ -82,16 +85,8 @@ def make_cumulative_weight_line(beans_df: pd.DataFrame, roasters_df: pd.DataFram
     df = df.dropna(subset=['purchase_date']).sort_values('purchase_date')
     df['cumulative_weight_g'] = df['weight_grams'].astype(float).cumsum()
 
-    roasters_for_merge = roasters_df[[ROASTERS_COL_ID, ROASTERS_COL_NAME]].rename(
-        columns={
-            ROASTERS_COL_ID: 'roaster_id',
-            ROASTERS_COL_NAME: BEANS_COL_ROASTER
-        }
-    )
-    merged_df = df.merge(roasters_for_merge, on=BEANS_COL_ROASTER, how='left')
-
     fig = px.line(
-        merged_df,
+        df,
         x=BEANS_COL_PURCHASE_DATE,
         y='cumulative_weight_g',
         labels=col_labels,
