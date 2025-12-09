@@ -6,8 +6,6 @@ services:
       - "${HOST_PORT:-8050}:8050"
     env_file:
       - .env
-    environment:
-      - PORT=8050
     volumes:
       - ./data:/app/data:ro
     restart: unless-stopped

@@ -17,10 +17,8 @@ dist/
 # Local tooling and IDE
 .vscode/
 .idea/
-dev/
+admin/
 venv/
 
 # Project data and misc
 *.log
-*.db
-*.sqlite

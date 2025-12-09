@@ -17,8 +17,16 @@ Dashboard for monitoring coffee consumption metrics.
 	- Direct: `docker run --env-file .env -p 8050:8050 coffee-canary`
 	- Compose: `docker compose up --build`
 
-Local app: http://0.0.0.0:8050
+Local app: http://localhost:8050
 
-Data sources
-- Postgres
+## Deploy to AWS Lightsail
+1. Set up an AWS Lightsail container service.
+2. Configure AWS CLI with credentials.
+3. Configure deployment variables and run the deployment script:
+```bash
+deploy_lightsail.sh
+```
+
+## Data sources
+- coffee_canary.db (SQLite)
 - CSV fallback
