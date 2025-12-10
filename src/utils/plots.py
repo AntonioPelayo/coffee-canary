@@ -1,3 +1,4 @@
+import dash_leaflet as dl
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -116,28 +117,24 @@ def make_roaster_location_map(roasters_df: pd.DataFrame):
     )[1], axis=1)
     df = df.dropna(subset=['lat', 'lon'])
 
-    fig = go.Figure(go.Scattergeo(
-        locationmode='USA-states',
-        lon=df['lon'],
-        lat=df['lat'],
-        text=df[ROASTERS_COL_NAME] + ' (' + df['Location'] + ')',
-        mode='markers',
-        marker=dict(size=10, color='crimson', line=dict(width=1, color='black')),
-        hovertext=df[ROASTERS_COL_NAME] + '<br>' + df['Location'],
-        hoverinfo='text',
-    ))
-    fig.update_layout(
-        title='Roaster Locations (US)',
-        geo=dict(
-            scope='usa',
-            projection=go.layout.geo.Projection(type='albers usa'),
-            showland=True,
-            landcolor='rgb(217, 217, 217)',
-            subunitcolor='rgb(255, 255, 255)',
-            countrycolor='rgb(255, 255, 255)',
-            lakecolor='rgb(255, 255, 255)',
-            bgcolor='rgba(0,0,0,0)'
-        ),
-        margin=dict(l=0, r=0, t=40, b=0)
+    markers = []
+    for _, row in df.iterrows():
+        tooltip_text = f"Roaster: {row[ROASTERS_COL_NAME]}<br>Location: {row[ROASTERS_COL_CITY]}, {row[ROASTERS_COL_STATE]}"
+        marker = dl.Marker(
+            position=[row['lat'], row['lon']],
+            children=[dl.Tooltip(content=tooltip_text)],
+            title=row[ROASTERS_COL_NAME]
+        )
+        markers.append(marker)
+
+    map = dl.Map(
+        [
+            dl.TileLayer(),
+            dl.LayerGroup(markers),
+            dl.LocateControl()
+        ],
+        center=[39.5, -98.35],
+        zoom=4,
+        style={"height": "50vh", "width": "100%"}
     )
-    return fig
+    return map

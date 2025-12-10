@@ -1,5 +1,6 @@
 dash
 dash_bootstrap_components==1.0.0
+dash-leaflet
 gunicorn
 pandas
 plotly

@@ -1,6 +1,6 @@
 import dash
-from dash import html, dcc
 import dash_bootstrap_components as dbc
+from dash import html, dcc
 
 from src.utils.data_helpers import (
     load_beans_dataframe,
@@ -29,7 +29,7 @@ layout = dbc.Container([
     )], className='mt-4'),
     dbc.Row([
         dbc.Col(dcc.Graph(figure=make_roast_level_pie(beans_df))),
-        dbc.Col(dcc.Graph(figure=make_roaster_location_map(roasters_df)))
+        dbc.Col(make_roaster_location_map(roasters_df))
     ], className='mt-4'),
     dbc.Row([dbc.Col(
         dcc.Graph(figure=make_roaster_distribution(beans_df, roasters_df)),
