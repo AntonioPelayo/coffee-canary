@@ -9,6 +9,7 @@ SERVICE=${SERVICE:-coffee-canary}
 CONTAINER_NAME=${CONTAINER_NAME:-coffee-canary-web-app}
 PORT=${PORT:-8050}
 DB_URL=${DB_URL:-sqlite:///data/coffee_canary.db}
+GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-'No Key Found'}
 LABEL=${LABEL:-latest}
 IMAGE_TAG=coffee-canary:${LABEL}
 
@@ -31,7 +32,7 @@ echo "[3/3] Creating deployment for service ${SERVICE}"
 aws lightsail create-container-service-deployment \
     --region "${REGION}" \
     --service-name "${SERVICE}" \
-    --containers "{\"${CONTAINER_NAME}\":{\"image\":\"${IMAGE_NAME}\",\"environment\":{\"DB_URL\":\"${DB_URL}\"},\"ports\":{\"${PORT}\":\"HTTP\"}}}" \
+    --containers "{\"${CONTAINER_NAME}\":{\"image\":\"${IMAGE_NAME}\",\"environment\":{\"DB_URL\":\"${DB_URL}\",\"GOOGLE_MAPS_API_KEY\":\"${GOOGLE_MAPS_API_KEY}\"},\"ports\":{\"${PORT}\":\"HTTP\"}}}" \
     --public-endpoint "containerName=${CONTAINER_NAME},containerPort=${PORT}"
 
 echo "Done."

@@ -34,5 +34,5 @@ if __name__ == "__main__":
     app.run(
         host=os.getenv('HOST', '0.0.0.0'),
         port=int(os.getenv('PORT', 8050)),
-        # debug=os.getenv('DEBUG', 'False') == 'True'
+        debug=os.getenv('DEBUG', 'False') == 'True'
     )
