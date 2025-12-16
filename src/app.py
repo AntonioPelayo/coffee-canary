@@ -10,13 +10,22 @@ app = dash.Dash(
 )
 app.title = "Coffee Canary"
 server = app.server
-
-# Minimal navbar with links to multipage routes
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Home", href="/")),
         dbc.NavItem(dbc.NavLink("Coffee Beans", href="/coffee_beans")),
         # dbc.NavItem(dbc.NavLink("Daily Consumption", href="/daily_consumption")),
+        dbc.DropdownMenu(
+            label="Admin Forms",
+            nav=True,
+            in_navbar=True,
+            children=[
+                dbc.DropdownMenuItem(
+                    "Coffee Beans Form",
+                    href="/admin_coffee_beans_form"
+                )
+            ]
+        )
     ],
     brand="Coffee Canary",
     brand_href="/",
