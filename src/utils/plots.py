@@ -130,3 +130,28 @@ def make_roaster_location_map(roasters_df: pd.DataFrame):
 
     map.children.append(dl.LayerGroup(markers))
     return map
+
+def make_coffee_notes_distribution(beans_df: pd.DataFrame):
+    """Bar chart of most common coffee tasting notes."""
+    if beans_df is None or beans_df.empty:
+        return px.bar(title='No coffee bean data available')
+
+    notes_series = beans_df['tasting_notes'].dropna().astype(str).str.strip()
+    if notes_series.empty:
+        return px.bar(title='No tasting notes available')
+
+    all_notes = notes_series.str.split(';').explode().str.strip()
+    counts = all_notes.value_counts().reset_index()
+    counts.columns = ['Tasting Note', 'Count']
+    counts = counts.sort_values(
+        ['Count', 'Tasting Note'],
+        ascending=[False, True]
+    ).head(20)
+
+    fig = px.bar(
+        counts,
+        x='Tasting Note',
+        y='Count',
+        title='Top 20 Coffee Tasting Notes'
+    )
+    return fig

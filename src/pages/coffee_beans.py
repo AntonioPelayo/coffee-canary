@@ -6,12 +6,7 @@ from src.utils.data_helpers import (
     load_beans_dataframe,
     load_roasters_dataframe,
 )
-from src.utils.plots import (
-    make_roaster_distribution,
-    make_roast_level_pie,
-    make_cumulative_weight_line,
-    make_roaster_location_map
-)
+from src.utils import plots
 
 dash.register_page(__name__, path='/coffee_beans', name='Coffee Beans')
 
@@ -24,15 +19,19 @@ layout = dbc.Container([
         width=12
     )]),
     dbc.Row([dbc.Col(
-        dcc.Graph(figure=make_cumulative_weight_line(beans_df)),
+        dcc.Graph(figure=plots.make_cumulative_weight_line(beans_df)),
         width=12
     )], className='mt-4'),
     dbc.Row([
-        dbc.Col(dcc.Graph(figure=make_roast_level_pie(beans_df))),
-        dbc.Col(make_roaster_location_map(roasters_df))
+        dbc.Col(dcc.Graph(figure=plots.make_roast_level_pie(beans_df))),
+        dbc.Col(plots.make_roaster_location_map(roasters_df))
     ], className='mt-4'),
     dbc.Row([dbc.Col(
-        dcc.Graph(figure=make_roaster_distribution(beans_df, roasters_df)),
+        dcc.Graph(figure=plots.make_roaster_distribution(beans_df, roasters_df)),
+        width=12
+    )]),
+    dbc.Row([dbc.Col(
+        dcc.Graph(figure=plots.make_coffee_notes_distribution(beans_df)),
         width=12
     )])
 ], fluid=True)
