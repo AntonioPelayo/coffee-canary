@@ -6,24 +6,32 @@ from dash import html, dcc
 app = dash.Dash(
     __name__,
     use_pages=True,
-    external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 app.title = "Coffee Canary"
 server = app.server
 
-# Minimal navbar with links to multipage routes
-navbar = dbc.NavbarSimple(
-    children=[
-        dbc.NavItem(dbc.NavLink("Home", href="/")),
-        dbc.NavItem(dbc.NavLink("Coffee Beans", href="/coffee_beans")),
-        # dbc.NavItem(dbc.NavLink("Daily Consumption", href="/daily_consumption")),
-    ],
-    brand="Coffee Canary",
-    brand_href="/",
-    color="dark",
-    dark=True,
-    className="mb-3",
-)
+navbar = html.Nav([
+    html.A(
+        "Antonio's Website Home",
+        href="https://apelayo.com",
+        style={"marginRight": "1rem"}
+    ),
+    html.A(
+        "Antonio's Projects",
+        href="https://apelayo.com/projects",
+        style={"marginRight": "1rem"}
+    ),
+    html.A(
+        "Coffee Dashboard Home",
+        href="/",
+        style={"marginRight": "1rem"}
+    ),
+    html.A(
+        "Coffee Purchase Trends",
+        href="/coffee_beans",
+        style={"marginRight": "1rem"}
+    ),
+])
 
 app.layout = html.Div([
     navbar,
