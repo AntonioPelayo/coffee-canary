@@ -7,6 +7,7 @@ GEOCODE_REQUEST_URL_TEMPLATE = "https://maps.googleapis.com/maps/api/geocode/jso
 def geocode_location(location: str) -> tuple[float, float]:
     """Get latitude and longitude for a given location using Google Maps Geocoding API."""
     if GOOGLE_MAPS_API_KEY == 'No Key Found' or not location:
+        print("Google Maps API key not found or location is empty.")
         return None, None
     try:
         result = requests.get(
