@@ -1,31 +1,12 @@
-# coffee-canary
-Dashboard for monitoring coffee consumption metrics.
+# Coffee Canary
+Dashboard for monitoring coffee purchase metrics and trends.
 
 ## Run (Local dev, no Docker)
-
 1. Copy `.env.example` to `.env` and fill values.
 2. Start the app:
-   - Dev (auto reload): `build.sh -d`
-   - Prod test (Gunicorn): `build.sh`
+   - Dev (auto reload): `bin/build_local.sh -d`
+   - Prod test (Gunicorn): `bin/build_local.sh`
 3. Access the app at `http://127.0.0.1:8050`
-
-## Run (Docker)
-
-1. Copy `.env.example` to `.env` and fill values (DB credentials, etc.).
-2. Build image: `docker build -t coffee-canary .`
-3. Run:
-	- Direct: `docker run --env-file .env -p 8050:8050 coffee-canary`
-	- Compose: `docker compose up --build`
-
-Local app: http://localhost:8050
-
-## Deploy to AWS Lightsail
-1. Set up an AWS Lightsail container service.
-2. Configure AWS CLI with credentials.
-3. Configure deployment variables and run the deployment script:
-```bash
-deploy_lightsail.sh
-```
 
 ## Data sources
 - coffee_canary.db (SQLite)
