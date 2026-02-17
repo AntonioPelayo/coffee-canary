@@ -33,6 +33,11 @@ navbar = html.Nav([
         href="/coffee_beans",
         style={"marginRight": "1rem"}
     ),
+    html.A(
+        "My Brewing Tools",
+        href="/brew_tools",
+        style={"marginRight": "1rem"}
+    ),
 ])
 
 app.layout = html.Div([
